@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Lia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* =============================================
+           VARIÁVEIS DE ESTILO — Hub Financeiro (dark)
+        ============================================= */
+        :root {
+            --gold: #f5c842;
+            --amber: #e0ac2c;
+            --gold-rgb: 245, 200, 66;
+            --amber-rgb: 224, 172, 44;
+            --btn-text: #14121a;
+            --bg: #0d0f17;
+            --bg-1: #11141f;
+            --bg-card: #151926;
+            --bd: #242a3a;
+            --tx: #e8eaf0;
+            --tx-2: #8b92a8;
+            --tx-3: #5c6378;
+            --danger: #ef5b5b;
+            --danger-hover: #e23f3f;
+            --success: #3ecf8e;
+            --input-bg: #0d0f17;
+            --shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5), 0 8px 16px -8px rgba(0, 0, 0, 0.4);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'DM Mono', 'SF Mono', Consolas, monospace;
+            --transition: 0.2s ease;
+        }
+
+        body.light {
+            --gold: #1d4ed8;
+            --amber: #1e3a8a;
+            --gold-rgb: 29, 78, 216;
+            --amber-rgb: 30, 58, 138;
+            --btn-text: #ffffff;
+            --bg: #f4f6fb;
+            --bg-1: #ffffff;
+            --bg-card: #ffffff;
+            --bd: #dde3ee;
+            --tx: #1a1d29;
+            --tx-2: #5b6376;
+            --tx-3: #8b92a8;
+            --danger: #e0413f;
+            --danger-hover: #c4322f;
+            --success: #1f9d6c;
+            --input-bg: #f4f6fb;
+            --shadow: 0 16px 40px -12px rgba(30, 41, 70, 0.14), 0 6px 14px -6px rgba(30, 41, 70, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 15% 10%, rgba(var(--gold-rgb), 0.06), transparent 45%),
+                radial-gradient(circle at 85% 90%, rgba(var(--amber-rgb), 0.04), transparent 50%);
+            color: var(--tx);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .app-container {
+            max-width: 860px;
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--bd);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem 2rem 2.2rem;
+            transition: var(--transition);
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--bd);
+            padding-bottom: 1.25rem;
+        }
+
+        .app-header h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--tx);
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        .app-header h1 .icon-coin {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        .app-header .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            background: rgba(var(--gold-rgb), 0.1);
+            color: var(--gold);
+            padding: 0.3rem 0.9rem;
+            border-radius: 20px;
+            border: 1px solid rgba(var(--gold-rgb), 0.25);
+            letter-spacing: 0.01em;
+        }
+
+        .app-header .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        /* --- Toggle switch (pill com label + switch, estilo "Mostrar tabela") --- */
+        .toggle-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--bg-1);
+            border: 1px solid var(--bd);
+            border-radius: 999px;
+            padding: 0.4rem 0.5rem 0.4rem 1rem;
+            cursor: pointer;
+            user-select: none;
+            transition: var(--transition);
+            font-family: var(--font);
+        }
+
+        .toggle-pill:hover {
+            border-color: var(--tx-3);
+        }
+
+        .toggle-pill .toggle-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--tx-2);
+            white-space: nowrap;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 38px;
+            height: 22px;
+            flex-shrink: 0;
+            background: var(--bd);
+            border-radius: 999px;
+            transition: var(--transition);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--tx-3);
+            transition: var(--transition);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-pill.active .toggle-switch {
+            background: var(--tx-3);
+        }
+
+        .toggle-pill.active .toggle-switch::after {
+            transform: translateX(16px);
+            background: var(--tx);
+        }
+
+        .toggle-pill.active .toggle-label {
+            color: var(--tx);
+        }
+
+        /* --- Formulário de adição --- */
+        .add-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+            align-items: flex-end;
+        }
+
+        .add-form .field {
+            flex: 1 1 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .add-form .field label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--tx-2);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .add-form input {
+            padding: 0.65rem 0.9rem;
+            border: 1px solid var(--bd);
+            border-radius: var(--radius-sm);
+            background: var(--input-bg);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            width: 100%;
+            font-family: var(--font);
+            color: var(--tx);
+        }
+
+        .add-form input::placeholder {
+            color: var(--tx-3);
+        }
+
+        .add-form input#origem {
+            text-transform: uppercase;
+        }
+
+        .add-form input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(var(--gold-rgb), 0.15);
+        }
+
+        .add-form .btn-add {
+            flex: 0 0 auto;
+            padding: 0.65rem 1.8rem;
+            background: linear-gradient(135deg, var(--gold), var(--amber));
+            color: var(--btn-text);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            height: 44px;
+            align-self: flex-end;
+            font-family: var(--font);
+        }
+
+        .add-form .btn-add:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(var(--gold-rgb), 0.35);
+            filter: brightness(1.05);
+        }
+
+        .add-form .btn-add:active {
+            transform: scale(0.97);
+        }
+
+        /* --- Tabela de itens --- */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 1.5rem 0 1.8rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--bd);
+            background: var(--bg-1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        thead {
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--bd);
+        }
+
+        thead th {
+            text-align: left;
+            padding: 0.8rem 1rem;
+            font-weight: 600;
+            color: var(--tx-2);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--bd);
+            transition: var(--transition);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: rgba(var(--gold-rgb), 0.03);
+        }
+
+        tbody td {
+            padding: 0.8rem 1rem;
+            vertical-align: middle;
+            color: var(--tx);
+        }
+
+        .col-origem {
+            font-weight: 500;
+        }
+        .col-valor {
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+        }
+
+        .btn-remove {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            transition: var(--transition);
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .btn-remove:hover {
+            background: rgba(239, 91, 91, 0.12);
+            color: var(--danger-hover);
+            transform: scale(1.1);
+        }
+
+        .empty-row td {
+            text-align: center;
+            color: var(--tx-3);
+            padding: 2rem 1rem;
+            font-style: italic;
+        }
+
+        /* --- Cards de resultados (3 cards) --- */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .result-card {
+            background: var(--bg-1);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.2rem;
+            border: 1px solid var(--bd);
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            transition: var(--transition);
+        }
+
+        .result-card .card-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--tx-2);
+            font-weight: 600;
+        }
+
+        .result-card .card-value {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--tx);
+            line-height: 1.2;
+        }
+
+        .result-card .card-value .currency {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--tx-2);
+            margin-right: 2px;
+        }
+
+        .result-card#feeCard {
+            position: relative;
+            border-color: rgba(var(--gold-rgb), 0.45);
+            box-shadow: 0 0 0 1px rgba(var(--gold-rgb), 0.12);
+        }
+
+        .result-card#feeCard .card-value {
+            color: var(--gold);
+        }
+
+        .result-card .card-sub {
+            font-size: 0.8rem;
+            color: var(--tx-2);
+            margin-top: 0.1rem;
+        }
+
+        .result-card .card-sub strong {
+            color: var(--tx);
+            font-family: var(--font-mono);
+            font-weight: 500;
+        }
+
+        .result-card .card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.2rem;
+        }
+
+        .result-card .card-actions .btn-action {
+            background: transparent;
+            border: 1px solid var(--bd);
+            padding: 0.3rem 0.9rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--tx-2);
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            white-space: nowrap;
+        }
+
+        .result-card .card-actions .btn-action:hover {
+            background: rgba(var(--gold-rgb), 0.1);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .result-card .card-actions .btn-action.danger:hover {
+            background: rgba(239, 91, 91, 0.12);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .result-card .card-actions .btn-action.pix-copy:hover {
+            background: rgba(62, 207, 142, 0.12);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .result-card .card-actions .btn-action.pix-copy.copied {
+            background: rgba(62, 207, 142, 0.12);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .result-card .card-actions .btn-action.pix-copy .check {
+            display: none;
+        }
+
+        .result-card .card-actions .btn-action.pix-copy.copied .check {
+            display: inline;
+        }
+
+        .result-card .card-actions .btn-action.pix-copy.copied .copy-icon {
+            display: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- Modal de senha (estilo overlay translúcido) --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.18s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--bd);
+            border-radius: var(--radius);
+            padding: 2rem;
+            width: min(360px, 100%);
+            box-shadow: var(--shadow);
+            animation: modalPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-card .modal-head {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-card .modal-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .modal-card .modal-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--tx);
+        }
+
+        .modal-card .modal-subtitle {
+            font-size: 0.82rem;
+            color: var(--tx-3);
+            margin-top: 0.3rem;
+        }
+
+        .modal-card .input-wrap {
+            position: relative;
+            margin-bottom: 0.8rem;
+        }
+
+        .modal-card .input-wrap input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--bd);
+            color: var(--tx);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 2.6rem 0.75rem 1rem;
+            font-size: 0.95rem;
+            font-family: var(--font);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .modal-card .input-wrap input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(var(--gold-rgb), 0.15);
+        }
+
+        .modal-card .toggle-eye {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--tx-3);
+            font-size: 16px;
+            padding: 4px;
+        }
+
+        .modal-card .modal-error {
+            display: none;
+            font-size: 0.75rem;
+            color: var(--danger);
+            margin-bottom: 0.7rem;
+            text-align: center;
+        }
+
+        .modal-card .modal-error.show {
+            display: block;
+        }
+
+        .modal-card .modal-actions {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 0.4rem;
+        }
+
+        .modal-card .modal-actions button {
+            flex: 1;
+            border-radius: var(--radius-sm);
+            padding: 0.7rem;
+            font-family: var(--font);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--bd);
+        }
+
+        .modal-card .modal-actions .btn-cancel {
+            background: var(--bg-1);
+            color: var(--tx-2);
+        }
+
+        .modal-card .modal-actions .btn-cancel:hover {
+            background: var(--input-bg);
+            color: var(--tx);
+        }
+
+        .modal-card .modal-actions .btn-confirm {
+            background: linear-gradient(135deg, var(--gold), var(--amber));
+            color: var(--btn-text);
+            border: none;
+            font-weight: 700;
+        }
+
+        .modal-card .modal-actions .btn-confirm:hover {
+            filter: brightness(1.06);
+            box-shadow: 0 8px 20px -6px rgba(var(--gold-rgb), 0.4);
+        }
+
+        .modal-card .modal-actions .btn-confirm.danger {
+            background: linear-gradient(135deg, var(--danger), var(--danger-hover));
+            color: #ffffff;
+        }
+
+        .modal-card .modal-actions .btn-confirm.danger:hover {
+            filter: brightness(1.06);
+            box-shadow: 0 8px 20px -6px rgba(224, 65, 63, 0.4);
+        }
+
+        .modal-card .modal-icon.danger-icon {
+            color: var(--danger);
+        }
+
+        .modal-card .confirm-message {
+            font-size: 0.9rem;
+            color: var(--tx-2);
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 1.4rem;
+        }
+
+        .modal-card .modal-success {
+            display: none;
+            text-align: center;
+        }
+
+        .modal-card .modal-success.show {
+            display: block;
+        }
+
+        .modal-card .modal-success .modal-icon {
+            color: var(--success);
+        }
+
+        .modal-card .fee-input-row {
+            margin: 1rem 0;
+        }
+
+        .modal-card .fee-input-row label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--tx-2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.4rem;
+        }
+
+        .modal-card .fee-input-row input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--bd);
+            color: var(--gold);
+            font-family: var(--font-mono);
+            border-radius: var(--radius-sm);
+            padding: 0.7rem 1rem;
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .modal-card .fee-input-row input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(var(--gold-rgb), 0.15);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalPop {
+            0% { opacity: 0; transform: scale(0.92) translateY(8px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* --- Rodapé / assinatura --- */
+        .app-footer {
+            margin-top: 1.8rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid var(--bd);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            font-size: 0.72rem;
+            color: var(--tx-3);
+        }
+
+        .app-footer .signature {
+            color: var(--tx-2);
+        }
+
+        .app-footer .signature strong {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* --- Responsivo --- */
+        @media (max-width: 700px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+            .result-card .card-value {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .app-container {
+                padding: 1.2rem;
+            }
+            .add-form .field {
+                flex: 1 1 100%;
+            }
+            .add-form .btn-add {
+                flex: 1 1 100%;
+                justify-content: center;
+            }
+            .app-header h1 {
+                font-size: 1.4rem;
+            }
+            .result-card .card-actions .btn-action {
+                font-size: 0.65rem;
+                padding: 0.25rem 0.7rem;
+            }
+            .modal-card {
+                padding: 1.5rem;
+            }
+        }
+
+        @keyframes fadeSlide {
+            0% { opacity: 0; transform: translateY(-6px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        tbody tr {
+            animation: fadeSlide 0.2s ease;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Cabeçalho -->
+    <header class="app-header">
+        <h1>
+            <svg class="icon-coin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9.25" stroke="var(--gold)" stroke-width="1.5"/>
+                <path d="M12 7.5V16.5M9.5 9.7C9.5 8.6 10.4 7.5 12 7.5C13.6 7.5 14.5 8.5 14.5 9.4C14.5 11.5 9.5 11 9.5 13.6C9.5 14.6 10.4 15.5 12 15.5C13.6 15.5 14.5 14.4 14.5 13.3" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            Calculadora Lia
+        </h1>
+        <div class="header-controls">
+            <span class="badge">Fee fixo • <span id="fixedFeeBadge">0,082954</span>%</span>
+            <div class="toggle-pill" id="themeToggle">
+                <span class="toggle-label">Tema escuro</span>
+                <span class="toggle-switch"></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Formulário de adição -->
+    <form class="add-form" id="addForm">
+        <div class="field">
+            <label for="origem">Origem do recurso</label>
+            <input type="text" id="origem" placeholder="Ex: Cliente A, Projeto X..." required autocomplete="off">
+        </div>
+        <div class="field">
+            <label for="valor">Valor (R$)</label>
+            <input type="text" id="valor" placeholder="0,00" required autocomplete="off" inputmode="decimal">
+        </div>
+        <button type="submit" class="btn-add">+ Adicionar</button>
+    </form>
+
+    <!-- Tabela de itens -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Origem</th>
+                    <th>Valor (R$)</th>
+                    <th style="width:60px; text-align:center;">Ação</th>
+                </tr>
+            </thead>
+            <tbody id="itemsBody">
+                <!-- linhas inseridas via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Grid de 3 cards -->
+    <div class="results-grid">
+        <!-- Card 1 – Total geral -->
+        <div class="result-card">
+            <div class="card-label">Total geral</div>
+            <div class="card-value"><span class="currency">R$</span> <span id="totalDisplay">0,00</span></div>
+        </div>
+
+        <!-- Card 2 – Taxa mensal da consultoria -->
+        <div class="result-card" id="feeCard">
+            <div class="card-label">Taxa mensal da consultoria</div>
+            <div class="card-value">
+                <span class="currency">R$</span> <span id="feeValue">0,00</span>
+            </div>
+            <div class="card-sub">
+                Percentual: <strong id="feePercentDisplay">0,082954%</strong>
+            </div>
+        </div>
+
+        <!-- Card 3 – Ações -->
+        <div class="result-card">
+            <div class="card-label">Ações</div>
+            <div class="card-actions">
+                <button class="btn-action" id="toggleFeeAuthBtn">🔐 Alterar taxa</button>
+                <button class="btn-action danger" id="clearAllBtn">Limpar</button>
+                <button class="btn-action pix-copy" id="pixBtn">
+                    <span class="copy-icon">📋</span>
+                    <span class="check">✅</span>
+                    Copiar chave Pix
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <span>Hub Financeiro</span>
+        <span class="signature"><strong>Pablo B. Freire</strong> · Criador · Consultor de Investimentos</span>
+    </footer>
+</div>
+
+<!-- Modal de senha -->
+<div class="modal-overlay" id="passwordModal">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div class="modal-icon">🔒</div>
+            <div class="modal-title">Área restrita</div>
+            <div class="modal-subtitle">Digite a senha para alterar a taxa</div>
+        </div>
+        <div class="input-wrap">
+            <input type="password" id="feePassword" placeholder="Senha" autocomplete="off">
+            <button class="toggle-eye" id="togglePasswordEye" type="button">👁️</button>
+        </div>
+        <div class="modal-error" id="authStatus">Senha incorreta. Tente novamente.</div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="cancelAuthBtn" type="button">Cancelar</button>
+            <button class="btn-confirm" id="authFeeBtn" type="button">Entrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de nova taxa (aparece após autenticar) -->
+<div class="modal-overlay" id="feeModal">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div class="modal-icon">🔓</div>
+            <div class="modal-title">Taxa editável</div>
+            <div class="modal-subtitle">Defina o novo percentual mensal da consultoria</div>
+        </div>
+        <div class="fee-input-row">
+            <label for="newFeeInput">Novo percentual (%)</label>
+            <input type="text" id="newFeeInput" placeholder="0,082954" autocomplete="off" inputmode="decimal">
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="cancelFeeBtn" type="button">Cancelar</button>
+            <button class="btn-confirm" id="confirmFeeBtn" type="button">Salvar taxa</button>
+        </div>
+        <div class="modal-actions" style="margin-top:0.6rem;">
+            <button class="btn-confirm hidden" id="saveHtmlBtn" style="width:100%;" type="button">💾 Salvar e baixar novo HTML</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmação genérico (substitui o confirm() nativo do navegador) -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div class="modal-icon" id="confirmModalIcon">⚠️</div>
+            <div class="modal-title" id="confirmModalTitle">Confirmar ação</div>
+        </div>
+        <div class="confirm-message" id="confirmModalMessage">Tem certeza?</div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="confirmModalCancelBtn" type="button">Cancelar</button>
+            <button class="btn-confirm" id="confirmModalOkBtn" type="button">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ============================================================
+        // TAXA FIXA – 1% ao ano / 12 = 0,082954% ao mês
+        // ============================================================
+        const FIXED_FEE_PERCENT = 0.082954;
+
+        // ========== Estado ==========
+        let items = [];
+        let currentFee = FIXED_FEE_PERCENT;
+        let isAuthenticated = false;
+
+        // ========== DOM references ==========
+        const form = document.getElementById('addForm');
+        const inputOrigem = document.getElementById('origem');
+        const inputValor = document.getElementById('valor');
+        const tbody = document.getElementById('itemsBody');
+        const totalDisplay = document.getElementById('totalDisplay');
+        const feeValue = document.getElementById('feeValue');
+        const feePercentDisplay = document.getElementById('feePercentDisplay');
+        const fixedFeeBadge = document.getElementById('fixedFeeBadge');
+        const clearBtn = document.getElementById('clearAllBtn');
+        const toggleFeeBtn = document.getElementById('toggleFeeAuthBtn');
+        const passwordModal = document.getElementById('passwordModal');
+        const feeModal = document.getElementById('feeModal');
+        const feePassword = document.getElementById('feePassword');
+        const togglePasswordEye = document.getElementById('togglePasswordEye');
+        const authFeeBtn = document.getElementById('authFeeBtn');
+        const authStatus = document.getElementById('authStatus');
+        const cancelAuthBtn = document.getElementById('cancelAuthBtn');
+        const newFeeInput = document.getElementById('newFeeInput');
+        const confirmFeeBtn = document.getElementById('confirmFeeBtn');
+        const cancelFeeBtn = document.getElementById('cancelFeeBtn');
+        const saveHtmlBtn = document.getElementById('saveHtmlBtn');
+        const pixBtn = document.getElementById('pixBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmModalIcon = document.getElementById('confirmModalIcon');
+        const confirmModalTitle = document.getElementById('confirmModalTitle');
+        const confirmModalMessage = document.getElementById('confirmModalMessage');
+        const confirmModalCancelBtn = document.getElementById('confirmModalCancelBtn');
+        const confirmModalOkBtn = document.getElementById('confirmModalOkBtn');
+
+        // ========== Funções auxiliares ==========
+
+        function formatMoney(value) {
+            return value.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function parseMoney(str) {
+            const cleaned = str.replace(/\./g, '').replace(',', '.');
+            return parseFloat(cleaned);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ============================================================
+        // MÁSCARA DE VALOR EM TEMPO REAL
+        // ============================================================
+        function formatRealTime(value) {
+            let clean = value.replace(/[^\d,]/g, '');
+            const commaIndex = clean.indexOf(',');
+            if (commaIndex !== -1) {
+                let before = clean.substring(0, commaIndex);
+                let after = clean.substring(commaIndex + 1).replace(/,/g, '');
+                clean = before + ',' + after;
+            }
+            let parts = clean.split(',');
+            let intPart = parts[0] || '';
+            let decPart = parts[1] || '';
+            if (decPart.length > 2) decPart = decPart.substring(0, 2);
+            if (intPart.length > 1 && intPart.startsWith('0')) {
+                intPart = intPart.replace(/^0+/, '');
+                if (intPart === '') intPart = '0';
+            }
+            if (intPart === '') intPart = '0';
+            let formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            let result = formattedInt;
+            if (clean.indexOf(',') !== -1) {
+                result += ',' + decPart;
+            } else if (decPart !== '') {
+                result += ',' + decPart;
+            }
+            return result;
+        }
+
+        function applyMask(input) {
+            const start = input.selectionStart;
+            const raw = input.value;
+            const formatted = formatRealTime(raw);
+            if (formatted !== raw) {
+                input.value = formatted;
+                let newPos = start;
+                if (raw[start - 1] === ',') {
+                    const commaPos = formatted.indexOf(',');
+                    if (commaPos !== -1) newPos = commaPos + 1;
+                    else newPos = formatted.length;
+                } else {
+                    const diff = formatted.length - raw.length;
+                    newPos = start + diff;
+                }
+                if (newPos > formatted.length) newPos = formatted.length;
+                if (newPos < 0) newPos = 0;
+                input.setSelectionRange(newPos, newPos);
+            }
+        }
+
+        // ========== Funções principais ==========
+
+        function updateSummary() {
+            const total = items.reduce((sum, item) => sum + item.valor, 0);
+            totalDisplay.textContent = formatMoney(total);
+            const percent = currentFee;
+            const fee = (total * percent) / 100;
+            feeValue.textContent = formatMoney(fee);
+            feePercentDisplay.textContent = percent.toFixed(6).replace('.', ',') + '%';
+            fixedFeeBadge.textContent = percent.toFixed(6).replace('.', ',');
+        }
+
+        function renderTable() {
+            if (items.length === 0) {
+                tbody.innerHTML = `
+                    <tr class="empty-row">
+                        <td colspan="3">Nenhum recurso cadastrado. Adicione o primeiro!</td>
+                    </tr>
+                `;
+                updateSummary();
+                return;
+            }
+            let html = '';
+            items.forEach((item) => {
+                html += `
+                    <tr data-id="${item.id}">
+                        <td class="col-origem">${escapeHtml(item.origem)}</td>
+                        <td class="col-valor">${formatMoney(item.valor)}</td>
+                        <td style="text-align:center;">
+                            <button class="btn-remove" data-id="${item.id}" title="Remover item">✕</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+            updateSummary();
+        }
+
+        function addItem(origem, valor) {
+            const origemUpper = origem.trim().toUpperCase();
+            if (!origemUpper || isNaN(valor) || valor < 0) return false;
+            const newItem = {
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                origem: origemUpper,
+                valor: parseFloat(valor)
+            };
+            items.push(newItem);
+            renderTable();
+            return true;
+        }
+
+        function removeItemById(id) {
+            items = items.filter(item => item.id !== id);
+            renderTable();
+        }
+
+        function clearAll() {
+            if (items.length === 0) return;
+            const count = items.length;
+            showConfirmModal({
+                title: 'Remover todos os itens',
+                message: `Tem certeza que deseja remover ${count === 1 ? 'o único item cadastrado' : `os ${count} itens cadastrados`}? Essa ação não pode ser desfeita.`,
+                icon: '🗑️',
+                confirmLabel: 'Remover tudo',
+                danger: true,
+                onConfirm: function() {
+                    items = [];
+                    renderTable();
+                }
+            });
+        }
+
+        function setFee(newFee) {
+            currentFee = parseFloat(newFee);
+            if (isNaN(currentFee) || currentFee < 0) currentFee = 0;
+            if (currentFee > 100) currentFee = 100;
+            updateSummary();
+        }
+
+        function openPasswordModal() {
+            passwordModal.classList.add('active');
+            authStatus.classList.remove('show');
+            feePassword.value = '';
+            feePassword.type = 'password';
+            togglePasswordEye.textContent = '👁️';
+            setTimeout(() => feePassword.focus(), 50);
+        }
+
+        function closePasswordModal() {
+            passwordModal.classList.remove('active');
+            feePassword.value = '';
+            authStatus.classList.remove('show');
+        }
+
+        function openFeeModal() {
+            newFeeInput.value = currentFee.toFixed(6).replace('.', ',');
+            feeModal.classList.add('active');
+            setTimeout(() => newFeeInput.focus(), 50);
+        }
+
+        function closeFeeModal() {
+            feeModal.classList.remove('active');
+        }
+
+        // ============================================================
+        // MODAL DE CONFIRMAÇÃO GENÉRICO — substitui o confirm() nativo
+        // do navegador por um modal no mesmo estilo visual do app.
+        // ============================================================
+        let pendingConfirmAction = null;
+
+        function showConfirmModal(options) {
+            confirmModalTitle.textContent = options.title || 'Confirmar ação';
+            confirmModalMessage.textContent = options.message || 'Tem certeza?';
+            confirmModalIcon.textContent = options.icon || '⚠️';
+            confirmModalOkBtn.textContent = options.confirmLabel || 'Confirmar';
+
+            if (options.danger) {
+                confirmModalIcon.classList.add('danger-icon');
+                confirmModalOkBtn.classList.add('danger');
+            } else {
+                confirmModalIcon.classList.remove('danger-icon');
+                confirmModalOkBtn.classList.remove('danger');
+            }
+
+            pendingConfirmAction = typeof options.onConfirm === 'function' ? options.onConfirm : null;
+            confirmModal.classList.add('active');
+            setTimeout(() => confirmModalOkBtn.focus(), 50);
+        }
+
+        function closeConfirmModal() {
+            confirmModal.classList.remove('active');
+            pendingConfirmAction = null;
+        }
+
+        confirmModalOkBtn.addEventListener('click', function() {
+            const action = pendingConfirmAction;
+            closeConfirmModal();
+            if (action) action();
+        });
+
+        confirmModalCancelBtn.addEventListener('click', closeConfirmModal);
+
+        confirmModal.addEventListener('click', function(e) {
+            if (e.target === confirmModal) closeConfirmModal();
+        });
+
+        function resetAuth() {
+            isAuthenticated = false;
+            saveHtmlBtn.classList.add('hidden');
+            closePasswordModal();
+            closeFeeModal();
+        }
+
+        function handleAuth() {
+            const senha = feePassword.value.trim();
+            if (senha === 'carteiras2025') {
+                isAuthenticated = true;
+                closePasswordModal();
+                openFeeModal();
+            } else {
+                authStatus.classList.add('show');
+                feePassword.value = '';
+                feePassword.focus();
+            }
+        }
+
+        function handleConfirmFee() {
+            const newFeeStr = newFeeInput.value.trim();
+            if (newFeeStr === '') return;
+            const newFee = parseFloat(newFeeStr.replace(',', '.'));
+            if (!isNaN(newFee) && newFee >= 0) {
+                setFee(newFee);
+                saveHtmlBtn.classList.remove('hidden');
+            } else {
+                alert('Valor inválido. A taxa permanece inalterada.');
+            }
+        }
+
+        // ============================================================
+        // EXPORTAÇÃO — gera um HTML novo, limpo, só com a taxa atualizada
+        // ============================================================
+        function generateNewHtml() {
+            const newFee = currentFee;
+
+            // Sempre parte do código-fonte original deste arquivo (este <script>),
+            // nunca do DOM renderizado — assim a tabela de itens da sessão atual
+            // (dados de clientes) NUNCA é embutida no arquivo exportado.
+            const sourceHtml = document.documentElement.outerHTML;
+
+            // Remove qualquer linha/atributo que tenha vazado estado de sessão
+            // (defensivo: garante que o <tbody> exportado sempre comece vazio).
+            let cleanedHtml = sourceHtml.replace(
+                /<tbody id="itemsBody">[\s\S]*?<\/tbody>/,
+                '<tbody id="itemsBody">\n                <!-- linhas inseridas via JS -->\n            </tbody>'
+            );
+
+            const regex = /const FIXED_FEE_PERCENT\s*=\s*[\d.]+;/;
+            if (!regex.test(cleanedHtml)) {
+                alert('Não foi possível localizar a constante de taxa no HTML. Nada foi alterado.');
+                return;
+            }
+            const newLine = `const FIXED_FEE_PERCENT = ${newFee};`;
+            let newHtml = cleanedHtml.replace(regex, newLine);
+
+            // ============================================================
+            // BLINDAGEM DE ESTADO — usa um DOM real (não regex sobre texto)
+            // para garantir que o arquivo exportado NUNCA nasça com a tela
+            // de "alterar taxa" destravada, mesmo que esta sessão esteja
+            // autenticada e com os modais abertos no momento do clique.
+            // Operar sobre elementos reais evita falsos positivos/negativos
+            // que regex sobre uma string HTML inteira poderia causar (por
+            // exemplo, o próprio texto deste script contendo trechos que
+            // parecem markup).
+            // ============================================================
+            try {
+                const parser = new DOMParser();
+                const exportDoc = parser.parseFromString(newHtml, 'text/html');
+
+                exportDoc.querySelectorAll('.modal-overlay').forEach(function(el) {
+                    el.classList.remove('active');
+                });
+                const exportedSaveBtn = exportDoc.getElementById('saveHtmlBtn');
+                if (exportedSaveBtn) exportedSaveBtn.classList.add('hidden');
+                const exportedAuthStatus = exportDoc.getElementById('authStatus');
+                if (exportedAuthStatus) exportedAuthStatus.classList.remove('show');
+                const exportedPassword = exportDoc.getElementById('feePassword');
+                if (exportedPassword) exportedPassword.value = '';
+
+                newHtml = '<!DOCTYPE html>\n' + exportDoc.documentElement.outerHTML;
+
+                // Confirma, sobre o DOM já limpo, que nenhum modal ficou ativo.
+                const stillActive = exportDoc.querySelector('.modal-overlay.active');
+                if (stillActive) {
+                    alert('Falha de segurança ao exportar: um modal ficaria aberto no arquivo gerado. Nada foi baixado — recarregue a página e tente novamente.');
+                    return;
+                }
+            } catch (err) {
+                alert('Falha de segurança ao exportar: não foi possível confirmar o estado do arquivo gerado. Nada foi baixado.');
+                return;
+            }
+
+            const blob = new Blob([newHtml], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'calculadora_lia.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert(`✅ Novo HTML gerado com taxa de ${newFee.toFixed(6)}%! Faça o upload no GitHub.`);
+            resetAuth();
+        }
+
+        function copyPix() {
+            const pixKey = '+5583996299191';
+            navigator.clipboard.writeText(pixKey).then(() => {
+                pixBtn.classList.add('copied');
+                setTimeout(() => {
+                    pixBtn.classList.remove('copied');
+                }, 3000);
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = pixKey;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                pixBtn.classList.add('copied');
+                setTimeout(() => {
+                    pixBtn.classList.remove('copied');
+                }, 3000);
+            });
+        }
+
+        // ========== Event listeners ==========
+
+        inputValor.addEventListener('input', function() {
+            applyMask(this);
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const origem = inputOrigem.value.trim();
+            const valorStr = inputValor.value.trim();
+            if (!origem) {
+                alert('Por favor, informe a origem do recurso.');
+                inputOrigem.focus();
+                return;
+            }
+            const valor = parseMoney(valorStr);
+            if (isNaN(valor) || valor <= 0) {
+                alert('Por favor, informe um valor válido (maior que zero). Use vírgula para decimais.');
+                inputValor.focus();
+                return;
+            }
+            const success = addItem(origem, valor);
+            if (success) {
+                inputOrigem.value = '';
+                inputValor.value = '';
+                inputOrigem.focus();
+            }
+        });
+
+        clearBtn.addEventListener('click', clearAll);
+        pixBtn.addEventListener('click', copyPix);
+
+        toggleFeeBtn.addEventListener('click', function() {
+            if (isAuthenticated) {
+                openFeeModal();
+                return;
+            }
+            openPasswordModal();
+        });
+
+        authFeeBtn.addEventListener('click', handleAuth);
+
+        feePassword.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAuth();
+            }
+        });
+
+        togglePasswordEye.addEventListener('click', function() {
+            if (feePassword.type === 'password') {
+                feePassword.type = 'text';
+                togglePasswordEye.textContent = '🙈';
+            } else {
+                feePassword.type = 'password';
+                togglePasswordEye.textContent = '👁️';
+            }
+        });
+
+        cancelAuthBtn.addEventListener('click', resetAuth);
+
+        passwordModal.addEventListener('click', function(e) {
+            if (e.target === passwordModal) resetAuth();
+        });
+
+        confirmFeeBtn.addEventListener('click', handleConfirmFee);
+
+        newFeeInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleConfirmFee();
+            }
+        });
+
+        cancelFeeBtn.addEventListener('click', resetAuth);
+
+        feeModal.addEventListener('click', function(e) {
+            if (e.target === feeModal) resetAuth();
+        });
+
+        saveHtmlBtn.addEventListener('click', function() {
+            if (!isAuthenticated) {
+                alert('Você precisa autenticar primeiro.');
+                return;
+            }
+            showConfirmModal({
+                title: 'Gerar novo arquivo',
+                message: `Deseja gerar um novo HTML com a taxa fixa de ${currentFee.toFixed(6)}%? O arquivo atual da tela será substituído pelo download.`,
+                icon: '💾',
+                confirmLabel: 'Gerar e baixar',
+                onConfirm: function() {
+                    generateNewHtml();
+                }
+            });
+        });
+
+        // Exclusão de itens via delegação
+        tbody.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-remove');
+            if (!btn) return;
+            const id = parseInt(btn.getAttribute('data-id'), 10);
+            if (!isNaN(id)) {
+                removeItemById(id);
+            }
+        });
+
+        // ========== Tema claro/escuro ==========
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                document.body.classList.add('light');
+                themeToggle.classList.add('active');
+                themeToggle.querySelector('.toggle-label').textContent = 'Tema claro';
+            } else {
+                document.body.classList.remove('light');
+                themeToggle.classList.remove('active');
+                themeToggle.querySelector('.toggle-label').textContent = 'Tema escuro';
+            }
+        }
+
+        themeToggle.addEventListener('click', function() {
+            const isLight = document.body.classList.contains('light');
+            const newTheme = isLight ? 'dark' : 'light';
+            applyTheme(newTheme);
+            try {
+                localStorage.setItem('calculadoraLiaTheme', newTheme);
+            } catch (e) { /* localStorage indisponível — ignora silenciosamente */ }
+        });
+
+        // ========== Inicialização ==========
+        setFee(FIXED_FEE_PERCENT);
+        renderTable();
+
+        try {
+            const savedTheme = localStorage.getItem('calculadoraLiaTheme');
+            applyTheme(savedTheme === 'light' ? 'light' : 'dark');
+        } catch (e) {
+            applyTheme('dark');
+        }
+    })();
+</script>
+</body>
+</html>
