@@ -921,7 +921,7 @@
                 <button class="btn-action pix-copy" id="pixBtn">
                     <span class="copy-icon">📋</span>
                     <span class="check">✅</span>
-                    Copiar Pix com valor
+                    Copiar chave Pix
                 </button>
             </div>
         </div>
@@ -1357,94 +1357,22 @@
         }
 
         // ============================================================
-        // PIX COPIA-E-COLA — monta o payload EMV/BR Code (padrão Bacen)
-        // com chave, nome, cidade e VALOR já embutidos, para que o
-        // app do banco preencha tudo automaticamente ao colar.
+        // PIX — copia apenas a chave Pix em texto puro. O Copia-e-Cola
+        // completo (com valor embutido) foi testado e alguns bancos não
+        // reconheceram o código corretamente, então voltamos ao formato
+        // simples que abre normalmente no app do banco.
         // ============================================================
         const PIX_KEY = '+5583996269191';
-        const PIX_RECEIVER_NAME = 'Pablo Barreto Freire';
-        const PIX_RECEIVER_CITY = 'Joao Pessoa';
-
-        // Remove acentos e caracteres fora do padrão aceito pelo Pix
-        // (o payload EMV exige apenas caracteres ASCII básicos).
-        function pixSanitize(text) {
-            return text
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^A-Za-z0-9 ]/g, '')
-                .toUpperCase();
-        }
-
-        // Monta um campo TLV: ID (2 dígitos) + tamanho (2 dígitos) + valor
-        function pixField(id, value) {
-            const length = String(value.length).padStart(2, '0');
-            return `${id}${length}${value}`;
-        }
-
-        // CRC16-CCITT (polinômio 0x1021), exigido como último campo do payload
-        function pixCrc16(payload) {
-            let crc = 0xFFFF;
-            for (let i = 0; i < payload.length; i++) {
-                crc ^= payload.charCodeAt(i) << 8;
-                for (let bit = 0; bit < 8; bit++) {
-                    if (crc & 0x8000) {
-                        crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
-                    } else {
-                        crc = (crc << 1) & 0xFFFF;
-                    }
-                }
-            }
-            return crc.toString(16).toUpperCase().padStart(4, '0');
-        }
-
-        function buildPixPayload(amount) {
-            const merchantAccountInfo =
-                pixField('00', 'BR.GOV.BCB.PIX') +
-                pixField('01', PIX_KEY);
-
-            const name = pixSanitize(PIX_RECEIVER_NAME).substring(0, 25) || 'PABLO BARRETO FREIRE';
-            const city = pixSanitize(PIX_RECEIVER_CITY).substring(0, 15) || 'JOAO PESSOA';
-
-            // Valor formatado com ponto decimal e 2 casas, sem milhar (padrão EMV)
-            const amountStr = amount.toFixed(2);
-
-            const additionalDataField = pixField('05', '***'); // campo de referência da transação
-
-            let payload =
-                pixField('00', '01') +                                  // Payload Format Indicator
-                pixField('26', merchantAccountInfo) +                   // Merchant Account Info (chave Pix)
-                pixField('52', '0000') +                                // Merchant Category Code
-                pixField('53', '986') +                                 // Moeda: BRL
-                pixField('54', amountStr) +                             // Valor da transação
-                pixField('58', 'BR') +                                  // País
-                pixField('59', name) +                                  // Nome do recebedor
-                pixField('60', city) +                                  // Cidade do recebedor
-                pixField('62', additionalDataField);                    // Dados adicionais
-
-            payload += '6304'; // ID + tamanho fixo do CRC (sempre 4 dígitos)
-            const crc = pixCrc16(payload);
-            return payload + crc;
-        }
 
         function copyPix() {
-            const total = items.reduce((sum, item) => sum + item.valor, 0);
-            const feeAmount = (total * currentFee) / 100;
-
-            if (feeAmount <= 0) {
-                alert('Adicione recursos antes de gerar o Pix: a taxa mensal está zerada.');
-                return;
-            }
-
-            const pixPayload = buildPixPayload(feeAmount);
-
-            navigator.clipboard.writeText(pixPayload).then(() => {
+            navigator.clipboard.writeText(PIX_KEY).then(() => {
                 pixBtn.classList.add('copied');
                 setTimeout(() => {
                     pixBtn.classList.remove('copied');
                 }, 3000);
             }).catch(() => {
                 const textArea = document.createElement('textarea');
-                textArea.value = pixPayload;
+                textArea.value = PIX_KEY;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand('copy');
