@@ -324,6 +324,8 @@
 
         .col-origem {
             font-weight: 500;
+            word-break: break-word;
+            max-width: 200px;
         }
         .col-valor {
             font-family: var(--font-mono);
@@ -734,6 +736,16 @@
             .result-card .card-value {
                 font-size: 1.3rem;
             }
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .app-header .header-controls {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
         }
 
         @media (max-width: 600px) {
@@ -756,6 +768,47 @@
             }
             .modal-card {
                 padding: 1.5rem;
+            }
+            table {
+                font-size: 0.85rem;
+            }
+            thead th, tbody td {
+                padding: 0.6rem 0.7rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .app-header .badge-label {
+                display: none;
+            }
+            .app-header .badge {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.65rem;
+            }
+            .toggle-pill .toggle-label {
+                font-size: 0.78rem;
+            }
+            .toggle-pill {
+                padding: 0.35rem 0.45rem 0.35rem 0.8rem;
+                gap: 0.45rem;
+            }
+            .toggle-switch {
+                width: 34px;
+                height: 20px;
+            }
+            .toggle-switch::after {
+                width: 16px;
+                height: 16px;
+            }
+            .toggle-pill.active .toggle-switch::after {
+                transform: translateX(14px);
+            }
+            .app-header h1 {
+                font-size: 1.2rem;
+            }
+            .app-header h1 .icon-coin {
+                width: 24px;
+                height: 24px;
             }
         }
 
@@ -781,7 +834,7 @@
             Calculadora Lia
         </h1>
         <div class="header-controls">
-            <span class="badge">Fee fixo • <span id="fixedFeeBadge">0,082954</span>%</span>
+            <span class="badge"><span class="badge-label">Fee fixo • </span><span id="fixedFeeBadge">0,082954</span>%</span>
             <div class="toggle-pill" id="themeToggle">
                 <span class="toggle-label">Tema escuro</span>
                 <span class="toggle-switch"></span>
