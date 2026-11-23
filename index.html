@@ -303,6 +303,74 @@
             text-transform: uppercase;
         }
 
+        /* --- Conversão de dólar (PTAX) --- */
+        .add-form.fx-box {
+            margin-bottom: 1.2rem;
+            padding-bottom: 1.8rem;
+            border-bottom: 1px dashed var(--bd);
+        }
+
+        .fx-box .fx-title {
+            flex: 1 1 100%;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--tx-2);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .fx-box .fx-title small {
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--tx-3);
+        }
+
+        .fx-box input[readonly] {
+            cursor: default;
+            font-family: var(--font-mono);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .fx-box .field {
+            position: relative;
+        }
+
+        .fx-box .fx-hint {
+            position: absolute;
+            left: 0;
+            top: calc(100% + 0.3rem);
+            white-space: nowrap;
+            font-size: 0.7rem;
+            color: var(--tx-3);
+            line-height: 1.2;
+        }
+
+        .fx-box .btn-use {
+            flex: 0 0 auto;
+            padding: 0.65rem 1.1rem;
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            height: 44px;
+            align-self: flex-end;
+            font-family: var(--font);
+        }
+
+        .fx-box .btn-use:hover {
+            background: rgba(var(--gold-rgb), 0.12);
+        }
+
+        .fx-box .btn-use:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
         .add-form input:focus {
             outline: none;
             border-color: var(--gold);
@@ -824,6 +892,13 @@
                 flex: 1 1 100%;
                 justify-content: center;
             }
+            .fx-box .btn-use {
+                flex: 1 1 100%;
+            }
+            .fx-box .fx-hint {
+                position: static;
+                white-space: normal;
+            }
             .app-header h1 {
                 font-size: 1.4rem;
             }
@@ -914,6 +989,25 @@
             </div>
         </div>
     </header>
+
+    <!-- Conversão de dólar (PTAX) -->
+    <div class="add-form fx-box" id="fxBox">
+        <div class="fx-title">Conversão de dólar <small>(opcional — PTAX de venda, Banco Central)</small></div>
+        <div class="field">
+            <label for="usdValor">Valor em dólar (US$)</label>
+            <input type="text" id="usdValor" placeholder="0,00" autocomplete="off" inputmode="decimal">
+        </div>
+        <div class="field">
+            <label for="ptaxValor">PTAX do dia (R$)</label>
+            <input type="text" id="ptaxValor" value="Carregando..." readonly tabindex="-1">
+            <span class="fx-hint" id="ptaxHint"></span>
+        </div>
+        <div class="field">
+            <label for="usdConvertido">Valor convertido (R$)</label>
+            <input type="text" id="usdConvertido" placeholder="0,00" readonly tabindex="-1">
+        </div>
+        <button type="button" class="btn-use" id="usdUseBtn" disabled>Usar no valor ↓</button>
+    </div>
 
     <!-- Formulário de adição -->
     <form class="add-form" id="addForm">
@@ -1833,6 +1927,91 @@
             applyMask(this);
         });
 
+        // ============================================================
+        // CONVERSÃO USD → BRL (PTAX de venda – Banco Central, API Olinda)
+        // ============================================================
+        const usdValor = document.getElementById('usdValor');
+        const ptaxValor = document.getElementById('ptaxValor');
+        const ptaxHint = document.getElementById('ptaxHint');
+        const usdConvertido = document.getElementById('usdConvertido');
+        const usdUseBtn = document.getElementById('usdUseBtn');
+        let ptaxRate = null;
+
+        function bcbDate(d) {
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return mm + '-' + dd + '-' + d.getFullYear();
+        }
+
+        function updateFx() {
+            const usd = parseMoney(usdValor.value || '');
+            if (ptaxRate && !isNaN(usd) && usd > 0) {
+                usdConvertido.value = formatMoney(Math.round(usd * ptaxRate * 100) / 100);
+                usdUseBtn.disabled = false;
+            } else {
+                usdConvertido.value = '';
+                usdUseBtn.disabled = true;
+            }
+        }
+
+        function loadPtax() {
+            const hoje = new Date();
+            const ini = new Date();
+            ini.setDate(hoje.getDate() - 10); // cobre fins de semana e feriados
+            const url = 'https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/' +
+                "CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)" +
+                "?@dataInicial='" + bcbDate(ini) + "'&@dataFinalCotacao='" + bcbDate(hoje) + "'" +
+                '&$orderby=dataHoraCotacao%20desc&$top=1&$format=json&$select=cotacaoVenda,dataHoraCotacao';
+            ptaxValor.readOnly = true;
+            ptaxValor.value = 'Carregando...';
+            ptaxHint.textContent = '';
+            fetch(url)
+                .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                .then(function(j) {
+                    const row = j && j.value && j.value[0];
+                    if (!row || !(row.cotacaoVenda > 0)) throw new Error('sem cotação');
+                    ptaxRate = row.cotacaoVenda;
+                    ptaxValor.value = ptaxRate.toFixed(4).replace('.', ',');
+                    const dt = row.dataHoraCotacao.slice(0, 10).split('-');
+                    ptaxHint.textContent = 'Cotação de ' + dt[2] + '/' + dt[1] + '/' + dt[0] + ' · Banco Central';
+                    updateFx();
+                })
+                .catch(function() {
+                    // Fallback: libera digitação manual da PTAX
+                    ptaxRate = null;
+                    ptaxValor.value = '';
+                    ptaxValor.placeholder = '0,0000';
+                    ptaxValor.readOnly = false;
+                    ptaxValor.removeAttribute('tabindex');
+                    ptaxHint.textContent = 'Não foi possível buscar a PTAX. Informe manualmente.';
+                    updateFx();
+                });
+        }
+
+        usdValor.addEventListener('input', function() {
+            applyMask(this);
+            updateFx();
+        });
+
+        ptaxValor.addEventListener('input', function() {
+            if (ptaxValor.readOnly) return;
+            let v = this.value.replace(/[^\d,]/g, '');
+            const parts = v.split(',');
+            if (parts.length > 1) v = parts[0] + ',' + parts.slice(1).join('').substring(0, 4);
+            this.value = v;
+            const n = parseMoney(v);
+            ptaxRate = (!isNaN(n) && n > 0) ? n : null;
+            updateFx();
+        });
+
+        usdUseBtn.addEventListener('click', function() {
+            if (!usdConvertido.value) return;
+            inputValor.value = usdConvertido.value;
+            inputOrigem.focus();
+        });
+
+        loadPtax();
+
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             const origem = inputOrigem.value.trim();
@@ -1851,6 +2030,8 @@
             addItem(origem, valor);
             inputOrigem.value = '';
             inputValor.value = '';
+            usdValor.value = '';
+            updateFx();
             inputOrigem.focus();
         });
 
